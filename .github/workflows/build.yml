@@ -15,7 +15,6 @@ jobs:
       fail-fast: false
       matrix:
         os: [windows-latest, ubuntu-latest, macos-latest]
-
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -25,24 +24,24 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Install PyInstaller
-        run: pip install pyinstaller
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pyinstaller
 
       - name: Build with PyInstaller (Windows)
         if: matrix.os == 'windows-latest'
-        run: python -m PyInstaller --onefile "import random.py"
+        run: python -m PyInstaller --onefile main.py
 
       - name: Build with PyInstaller (Linux)
         if: matrix.os == 'ubuntu-latest'
-        run: pyinstaller --onefile "import random.py"
+        run: python -m PyInstaller --onefile main.py
 
-      - name: Build with PyInstaller (Mac App Bundle)
+      - name: Build with PyInstaller (macOS)
         if: matrix.os == 'macos-latest'
-        run: pyinstaller --onefile --windowed "import random.py"
+        run: python -m PyInstaller --onefile --windowed main.py
 
       - name: Upload Binary to Release
         uses: softprops/action-gh-release@v2
         with:
           files: dist/*
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
