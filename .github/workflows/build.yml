@@ -12,32 +12,37 @@ jobs:
     name: Build for ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
         os: [windows-latest, ubuntu-latest, macos-latest]
 
     steps:
-    - name: Checkout Code
-      uses: actions/checkout@v4
+      - name: Checkout Code
+        uses: actions/checkout@v4
 
-    - name: Set up Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.11'
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
 
-    - name: Install PyInstaller
-      run: pip install pyinstaller
+      - name: Install PyInstaller
+        run: pip install pyinstaller
 
-    - name: Build with PyInstaller (Windows/Linux)
-      if: matrix.os != 'macos-latest'
-      run: pyinstaller --onefile "import random.py"
+      - name: Build with PyInstaller (Windows)
+        if: matrix.os == 'windows-latest'
+        run: python -m PyInstaller --onefile "import random.py"
 
-    - name: Build with PyInstaller (Mac App Bundle)
-      if: matrix.os == 'macos-latest'
-      run: pyinstaller --onefile --windowed "import random.py"
+      - name: Build with PyInstaller (Linux)
+        if: matrix.os == 'ubuntu-latest'
+        run: pyinstaller --onefile "import random.py"
 
-    - name: Upload Binary to Release
-      uses: softprops/action-gh-release@v2
-      with:
-        files: dist/*
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build with PyInstaller (Mac App Bundle)
+        if: matrix.os == 'macos-latest'
+        run: pyinstaller --onefile --windowed "import random.py"
+
+      - name: Upload Binary to Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
