@@ -1,0 +1,433 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#101725">
+<title>Realmforge — Pixel RPG</title>
+<style>
+:root{color-scheme:dark;--bg:#101725;--panel:#172235;--panel2:#1d2b42;--line:#34465f;--text:#e7edf5;--muted:#9aaac0;--mint:#61dfbe;--gold:#f3c469;--red:#f47778;--blue:#78b5ff;--shadow:0 14px 34px #080d16aa}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 50% -15%,#263a54 0,#101725 56%);color:var(--text);font:15px/1.5 "Trebuchet MS",system-ui,sans-serif}
+button,input,select{font:inherit}
+button{cursor:pointer}
+.app{width:min(1460px,100%);margin:auto;padding:22px}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:18px;background:#172235ed;border:1px solid var(--line);padding:13px 18px;box-shadow:var(--shadow)}
+.brand{display:flex;align-items:center;gap:12px}
+.brand-mark{width:38px;height:38px;display:grid;place-items:center;background:#22473f;border:2px solid var(--mint);color:var(--gold);font-size:21px;box-shadow:inset 0 0 0 4px #172235}
+h1,h2,h3,p{margin-top:0}
+h1{font-size:20px;letter-spacing:.14em;margin:0}
+.tagline{font-size:11px;color:var(--muted);letter-spacing:.16em}
+.top-status{display:flex;gap:9px;flex-wrap:wrap;justify-content:flex-end}
+.pill{padding:6px 10px;border:1px solid var(--line);background:#101a2a;color:var(--muted);font-size:12px}
+.pill strong{color:var(--text)}
+.pill.gold strong{color:var(--gold)}
+.pill.hp strong{color:var(--red)}
+.layout{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(310px,.8fr);gap:18px;margin-top:18px}
+.left,.right{display:grid;gap:16px;align-content:start;min-width:0}
+.scene-wrap{position:relative;background:#111b2c;border:1px solid #70829a;box-shadow:var(--shadow);overflow:hidden}
+#scene{display:block;width:100%;height:auto;image-rendering:pixelated;aspect-ratio:3.5/1}
+.scene-caption{position:absolute;left:14px;top:12px;text-shadow:2px 2px #101725;color:#eaf0ed;font-size:11px;letter-spacing:.15em}
+.scene-caption b{color:var(--mint)}
+.section,.card{background:linear-gradient(145deg,#1a273b,#141f31);border:1px solid var(--line);box-shadow:var(--shadow)}
+.section{padding:16px}
+.section-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
+.section-head h2,.card h2{font-size:15px;letter-spacing:.09em;text-transform:uppercase;margin:0}
+.muted{color:var(--muted)}
+.actions{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;border:1px solid #49627c;background:#22334b;color:var(--text);padding:9px 12px;min-height:40px;text-align:center;transition:background .15s,border-color .15s,transform .15s}
+.btn:hover:not(:disabled){background:#2d4561;border-color:var(--mint);transform:translateY(-1px)}
+.btn.primary{background:#1e5148;border-color:#3d9c85;color:#dbfff4}
+.btn.primary:hover:not(:disabled){background:#276657}
+.btn.gold{background:#44391f;border-color:#8d7040;color:#ffe2a3}
+.btn.danger{background:#482c38;border-color:#8e4e62;color:#ffdce2}
+.btn.ghost{background:transparent}
+.btn:disabled{opacity:.42;cursor:not-allowed}
+.wide{width:100%}
+.tools{display:flex;gap:8px;flex-wrap:wrap}
+.work-head{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.work-head h2{font-size:17px;margin:0}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin-top:14px}
+.card{padding:13px;box-shadow:none}
+.card h3{font-size:15px;margin:0 0 5px}
+.card p{font-size:13px;color:var(--muted);margin:5px 0}
+.card .btn{margin-top:9px}
+.small{font-size:12px;color:var(--muted)}
+.log{max-height:280px;overflow:auto;padding:5px 10px;background:#101a29;border:1px solid #283950}
+.log-line{padding:6px 1px;border-bottom:1px solid #243248;font-size:13px}
+.log-line:last-child{border-bottom:0}
+.log-line.good{color:#9ce7ce}
+.log-line.bad{color:#ffaeae}
+.log-line.note{color:#a9c8f5}
+.sidebar{display:grid;gap:12px}
+.stat-row{display:flex;justify-content:space-between;gap:10px;padding:6px 0;border-bottom:1px solid #29384c;font-size:13px}
+.stat-row:last-child{border:0}
+.meter{height:9px;background:#0d1521;border:1px solid #35445a;margin-top:4px}
+.meter span{display:block;height:100%;background:var(--red);transition:width .3s}
+.meter.xp span{background:var(--blue)}
+.table{width:100%;border-collapse:collapse;font-size:13px}
+.table th,.table td{padding:8px 6px;text-align:left;border-bottom:1px solid #29384c;vertical-align:middle}
+.table th{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em}
+.table input{width:68px;padding:6px;background:#101a29;border:1px solid var(--line);color:var(--text)}
+.table-wrap{overflow:auto}
+.tabs{display:flex;gap:7px;flex-wrap:wrap;margin:12px 0}
+.tabs .active{border-color:var(--mint);color:var(--mint)}
+.callout{padding:10px 12px;background:#142a2b;border-left:3px solid var(--mint);font-size:13px;margin:10px 0;color:#d3eee6}
+.notice{margin:12px 0;padding:10px 12px;border:1px solid #76643b;background:#312c20;color:#ffe4a9}
+.species-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:12px 0}
+.species-card{border:1px solid var(--line);background:#111b2b;padding:12px}
+.species-card.selected{border-color:var(--mint);box-shadow:inset 0 0 0 1px var(--mint)}
+.species-card h3{margin:0 0 5px}
+.species-card p{font-size:12px;color:var(--muted);margin:5px 0}
+.form-row{display:flex;gap:9px;align-items:center;flex-wrap:wrap}
+.form-row input,.form-row select,.field{padding:9px 10px;border:1px solid var(--line);background:#101a29;color:var(--text);min-height:40px}
+.field{width:100%;margin:5px 0 10px}
+.empty{padding:18px;color:var(--muted);text-align:center;border:1px dashed var(--line)}
+.footer{color:var(--muted);text-align:center;font-size:11px;padding:16px}
+@media(max-width:900px){.layout{grid-template-columns:1fr}.right{grid-template-columns:repeat(2,minmax(0,1fr))}.right .log-panel{grid-column:1/-1}}
+@media(max-width:560px){.app{padding:10px}.topbar{align-items:flex-start;flex-direction:column}.top-status{justify-content:flex-start}.layout{margin-top:10px;gap:10px}.right{grid-template-columns:1fr}.right .log-panel{grid-column:auto}.actions{grid-template-columns:repeat(2,minmax(0,1fr))}.species-grid{grid-template-columns:1fr}.section{padding:12px}}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="topbar">
+    <div class="brand"><div class="brand-mark">✦</div><div><h1>REALMFORGE</h1><div class="tagline">PIXEL RPG ADVENTURE · OFFLINE EDITION</div></div></div>
+    <div class="top-status" id="top-status"></div>
+  </header>
+  <div class="layout">
+    <main class="left">
+      <div class="scene-wrap"><canvas id="scene" width="840" height="240" aria-label="Pixel-art wilderness scene"></canvas><div class="scene-caption"><b>◆</b> THE MOONLIT FRONTIER</div></div>
+      <section class="section" id="workspace"></section>
+    </main>
+    <aside class="right">
+      <section class="section sidebar" id="hero-card"></section>
+      <section class="section log-panel"><div class="section-head"><h2>Adventure log</h2><button class="btn ghost" data-act="clear-log">Clear</button></div><div class="log" id="log"></div></section>
+      <section class="section"><div class="section-head"><h2>Save &amp; files</h2></div><div class="tools"><button class="btn" data-act="save">Save</button><button class="btn" data-act="export">Export</button><label class="btn" for="import-file">Import save</label><input id="import-file" type="file" accept=".json,application/json" hidden></div><p class="small" style="margin:10px 0 0">Progress is stored in this browser. Export a JSON backup to move it to another device.</p></section>
+    </aside>
+  </div>
+  <div class="footer">A self-contained browser port of Realmforge. No installs, server, or internet connection required.</div>
+</div>
+<script>
+"use strict";
+const RAW=["dirt","iron","wood","stone","copper","gunpowder","sand","blood","herb","crystal"];
+const RARE=["ancient_relic","dragon_scale","enchanted_wood","shadow_core"];
+const speciesData={
+ Human:{hp:80,power:8,def:1,buff:"Tactical Mastery: +20% XP and advanced firearms.",weak:"Fragile Frame: heavy physical attacks hurt more.",attacks:{punch:{dmg:25,cd:0,max_cd:0},kick:{dmg:45,cd:0,max_cd:1}},unlockables:{shoot:{dmg:40,cd:0,max_cd:1},grenade:{dmg:75,cd:0,max_cd:2,status:"burn"},sniper:{dmg:110,cd:0,max_cd:3}}},
+ Vampire:{hp:95,power:12,def:0,buff:"Sanguine Drain: dark abilities steal life; high base HP.",weak:"Sunlight Vulnerability: little natural defense.",attacks:{blood_sucker:{dmg:30,cd:0,max_cd:0,status:"drain"},bat_bite:{dmg:50,cd:0,max_cd:2}},unlockables:{hypnotize:{dmg:10,cd:0,max_cd:3,status:"stun"},mist_form:{dmg:-30,cd:0,max_cd:3},blood_drain:{dmg:85,cd:0,max_cd:3,status:"drain"}}},
+ Cyborg:{hp:120,power:9,def:3,buff:"Nanite Plating: strongest starting defense and health.",weak:"Overclock Strain: abilities cool down one turn slower.",attacks:{laser_blast:{dmg:22,cd:0,max_cd:0},rocket_punch:{dmg:52,cd:0,max_cd:1}},unlockables:{emp_wave:{dmg:65,cd:0,max_cd:2,status:"stun"},self_repair:{dmg:-40,cd:0,max_cd:3},overclock:{dmg:120,cd:0,max_cd:4,status:"burn"}}},
+ Elf:{hp:65,power:10,def:0,buff:"Nature's Precision: poison attacks and 20% critical chance.",weak:"Fragile Constitution: lowest starting health.",attacks:{bow_shot:{dmg:35,cd:0,max_cd:0},dagger_slash:{dmg:55,cd:0,max_cd:1}},unlockables:{poison_arrow:{dmg:70,cd:0,max_cd:2,status:"poison"},stealth:{dmg:0,cd:0,max_cd:3,status:"stealth"},nature_heal:{dmg:-35,cd:0,max_cd:3}}}
+};
+const trainer={
+ berserk_strike:{gold:250,mat:"ancient_relic",qty:1,atk:{dmg:95,cd:0,max_cd:3},"desc":"A reckless heavy strike dealing huge damage."},
+ divine_shield:{gold:300,mat:"enchanted_wood",qty:2,atk:{dmg:-50,cd:0,max_cd:4},"desc":"Restore 50 HP plus your power."},
+ shadow_strike:{gold:450,mat:"shadow_core",qty:2,atk:{dmg:130,cd:0,max_cd:4,status:"drain"},"desc":"Strike from the shadows and steal health."},
+ dragon_breath:{gold:600,mat:"dragon_scale",qty:2,atk:{dmg:160,cd:0,max_cd:5,status:"burn"},"desc":"Devastating dragon fire that burns enemies."}
+};
+const enemies={
+ "Goblin Scout":{hp:50,power:6,exp:25,gold:[15,30],drop:"wood",attacks:{slash:8,stab:12}},
+ "Bandit Marauder":{hp:80,power:9,exp:45,gold:[30,60],drop:"iron",attacks:{heavy_strike:16,cleave:20}},
+ "Corrupted Cyborg":{hp:120,power:12,exp:75,gold:[50,90],drop:"copper",attacks:{overcharge:22,plasma_cut:28}},
+ "Vampire Lord":{hp:160,power:15,exp:110,gold:[80,140],drop:"blood",attacks:{dark_frenzy:26,shadow_bolt:32}},
+ "Elder Dragon":{hp:320,power:24,exp:280,gold:[300,600],drop:"dragon_scale",attacks:{inferno:40,tail_slam:32}}
+};
+const recipes={
+ ancient_relic:{req:{stone:10,crystal:2},def:0,atk:0,qty:1,species:"Universal"},
+ enchanted_wood:{req:{wood:10,herb:4},def:0,atk:0,qty:1,species:"Universal"},
+ shadow_core:{req:{blood:8,crystal:3},def:0,atk:0,qty:1,species:"Universal"},
+ dragon_scale:{req:{copper:10,iron:10,crystal:4},def:0,atk:0,qty:1,species:"Universal"},
+ brick_wall:{req:{stone:3,dirt:2},def:2,atk:0,qty:1,species:"Universal"},
+ barrier:{req:{iron:3,wood:2},def:4,atk:0,qty:1,species:"Universal"},
+ shadow_cloak:{req:{shadow_core:2,blood:5},def:8,atk:5,qty:1,species:"Universal"},
+ enchanted_staff:{req:{enchanted_wood:3,crystal:5},def:3,atk:18,qty:1,species:"Universal"},
+ dragon_armor:{req:{dragon_scale:3,iron:8},def:15,atk:2,qty:1,species:"Universal"},
+ relic_blade:{req:{ancient_relic:2,iron:6},def:2,atk:25,qty:1,species:"Universal"},
+ rifle:{req:{iron:4,wood:2,gunpowder:2},def:0,atk:15,qty:1,species:"Human",unlock:"sniper"},
+ coffin:{req:{wood:8,blood:3},def:3,atk:5,qty:1,species:"Vampire",unlock:"blood_drain"},
+ wire:{req:{copper:2,iron:2},def:1,atk:2,qty:2,species:"Cyborg",unlock:"emp_wave"},
+ arrow:{req:{wood:2,stone:2},def:0,atk:0,qty:10,species:"Elf",unlock:"poison_arrow"}
+};
+const buyPrices={dirt:5,wood:8,stone:10,iron:20,copper:25,gunpowder:30,blood:35,herb:15,crystal:50,ancient_relic:150,enchanted_wood:200,shadow_core:300,dragon_scale:450};
+const sellPrices=Object.fromEntries(Object.entries(buyPrices).map(([k,v])=>[k,Math.floor(v*.6)]));
+Object.assign(sellPrices,{brick_wall:25,barrier:40,shadow_cloak:250,enchanted_staff:320,dragon_armor:500,relic_blade:420,rifle:120,coffin:100,wire:30,arrow:15});
+const structureInfo={
+ armory:{label:"Armory",gold:200,mat:"iron",qty:5,description:"+2 ATK and +1 DEF per level."},
+ treasury:{label:"Treasury",gold:250,mat:"copper",qty:5,description:"+25 gold each action per level."},
+ quarry:{label:"Quarry",gold:150,mat:"stone",qty:10,description:"Find materials each action per level."},
+ barracks:{label:"Barracks",gold:300,mat:"wood",qty:5,description:"+2 clan member capacity per level."},
+ infirmary:{label:"Infirmary",gold:250,mat:"herb",qty:5,description:"Restore 5 HP each action per level."},
+ library:{label:"Library",gold:350,mat:"crystal",qty:2,description:"+10% XP per level."},
+ watchtower:{label:"Watchtower",gold:300,mat:"iron",qty:8,description:"+1 DEF per level."}
+};
+const $=s=>document.querySelector(s);
+const state={player:null,screen:"dashboard",marketTab:"buy",log:[],combat:null,notice:"",anim:0};
+function word(s){return String(s).replaceAll("_"," ").replace(/\b\w/g,c=>c.toUpperCase())}
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+function number(n){return Math.floor(Number(n)||0).toLocaleString()}
+function rand(min,max){return Math.floor(Math.random()*(max-min+1))+min}
+function pick(arr){return arr[Math.floor(Math.random()*arr.length)]}
+function log(text,kind=""){state.log.unshift({text,kind});state.log=state.log.slice(0,80);renderLog()}
+function say(text,kind=""){state.notice=text;log(text,kind)}
+function newPlayer(name,species){
+ const d=speciesData[species],inventory={};
+ [...RAW,...RARE,...Object.keys(recipes)].forEach(item=>inventory[item]=RAW.includes(item)?5:0);
+ return {name:name.trim()||"Wayfarer",species,level:1,exp:0,exp_needed:100,gold:150,bank_gold:0,base_max_hp:d.hp,hp:d.hp,base_power:d.power,bonus_power:0,base_defence:d.def,bonus_defence:0,buff:d.buff,weakness:d.weak,attacks:structuredClone(d.attacks),unlockables:structuredClone(d.unlockables),clan:{tier:1,members:1,max_members:5,armory_lvl:0,treasury_lvl:0,quarry_lvl:0,barracks_lvl:0,infirmary_lvl:0,library_lvl:0,watchtower_lvl:0},inventory,mining_cooldown:0,status_effects:{}};
+}
+function totalPower(p=state.player){return p.base_power+p.bonus_power+p.level*2}
+function totalDef(p=state.player){return p.base_defence+p.bonus_defence}
+function heal(amount){const p=state.player;p.hp=Math.min(p.base_max_hp,p.hp+amount)}
+function gainXP(amount){
+ const p=state.player;
+ if(p.species==="Human")amount=Math.floor(amount*1.2);
+ if(p.clan.library_lvl>0)amount=Math.floor(amount*(100+10*p.clan.library_lvl)/100);
+ p.exp+=amount;say(`+ ${amount} XP earned!`,"good");
+ while(p.exp>=p.exp_needed){p.exp-=p.exp_needed;p.level++;p.exp_needed=Math.floor(p.exp_needed*1.5);p.base_max_hp+=15;p.base_power+=2;p.hp=p.base_max_hp;say(`Level up! You reached level ${p.level}; HP and power increased.`,"good")}
+}
+function tickCooldowns(){
+ const p=state.player;
+ for(const a of Object.values(p.attacks))if(a.cd>0)a.cd--;
+ if(p.mining_cooldown>0)p.mining_cooldown--;
+ if(p.bank_gold>0){const interest=Math.floor(p.bank_gold*.02);p.bank_gold+=interest;if(interest)say(`The bank paid ${interest} gold in interest.`,"good")}
+ const c=p.clan;
+ if(c.treasury_lvl){const earned=c.treasury_lvl*25;p.gold+=earned;say(`Your treasury generated ${earned} gold.`,"good")}
+ if(c.quarry_lvl){const material=pick([...RAW,...RARE]);p.inventory[material]=(p.inventory[material]||0)+c.quarry_lvl;say(`Your quarry produced ${c.quarry_lvl} ${word(material)}.`,"good")}
+ if(c.infirmary_lvl){const before=p.hp;heal(c.infirmary_lvl*5);if(p.hp>before)say(`Your infirmary restored ${p.hp-before} HP.`,"good")}
+}
+function defaultView(){state.screen="dashboard";state.notice="";render()}
+function renderTop(){
+ const p=state.player,el=$("#top-status");
+ if(!p){el.innerHTML='<span class="pill">Begin a new adventure to play</span>';return}
+ el.innerHTML=`<span class="pill"><strong>${esc(p.name)}</strong> · ${esc(p.species)} · Lv ${p.level}</span><span class="pill hp">HP <strong>${number(p.hp)}/${number(p.base_max_hp)}</strong></span><span class="pill gold"><strong>${number(p.gold)} G</strong></span>`;
+}
+function renderHero(){
+ const el=$("#hero-card"),p=state.player;
+ if(!p){el.innerHTML='<h2>Hero status</h2><p class="muted">Choose a species to begin.</p>';return}
+ const hp=Math.max(0,Math.min(100,p.hp/p.base_max_hp*100)),xp=Math.max(0,Math.min(100,p.exp/p.exp_needed*100));
+ el.innerHTML=`<div class="section-head"><h2>${esc(p.name)}</h2><span class="pill">LEVEL ${p.level}</span></div>
+ <div class="stat-row"><span>Species</span><strong>${esc(p.species)}</strong></div>
+ <div class="stat-row"><span>Health</span><strong>${p.hp}/${p.base_max_hp}</strong></div><div class="meter"><span style="width:${hp}%"></span></div>
+ <div class="stat-row"><span>Experience</span><strong>${p.exp}/${p.exp_needed}</strong></div><div class="meter xp"><span style="width:${xp}%"></span></div>
+ <div class="stat-row"><span>Attack</span><strong>${totalPower(p)}</strong></div><div class="stat-row"><span>Defense</span><strong>${totalDef(p)}</strong></div>
+ <div class="stat-row"><span>Gold · bank</span><strong>${number(p.gold)} · ${number(p.bank_gold)}</strong></div>
+ <p class="small">${esc(p.buff)}</p>`;
+}
+function renderLog(){
+ const el=$("#log");if(!el)return;
+ el.innerHTML=state.log.length?state.log.map(entry=>`<div class="log-line ${entry.kind}">${esc(entry.text)}</div>`).join(""):'<div class="empty">Your story begins here.</div>';
+}
+function dashboard(){
+ const p=state.player;
+ if(!p)return `<div class="work-head"><h2>Start your adventure</h2></div><div class="callout"><b>About Realmforge:</b> A single-player fantasy and sci-fi RPG. Choose a Human, Vampire, Cyborg, or Elf; explore a moonlit frontier, gather resources, and battle enemies from goblin scouts to an Elder Dragon. Learn species abilities, craft equipment, earn gold and experience, and build a powerful clan.</div><label class="small" for="new-name">Hero name</label><input id="new-name" class="field" maxlength="24" placeholder="Enter a name" autocomplete="off"><div class="species-grid">${Object.entries(speciesData).map(([name,d])=>`<div class="species-card" data-species="${name}"><h3>${name}</h3><p>${esc(d.buff)}</p><p><b>HP ${d.hp}</b> · <b>ATK ${d.power}</b> · <b>DEF ${d.def}</b></p><button class="btn primary wide" data-act="new-game" data-species="${name}">Play as ${name}</button></div>`).join("")}</div>${loadableSave()?'<button class="btn gold" data-act="load">Load browser save</button>':""}<p class="small">Your save stays in this browser. Use Save &amp; files to export or import a backup.</p>`;
+ return `<div class="section-head"><h2>Choose your next action</h2><span class="small">No scrolling menus · everything is clickable</span></div>
+ <div class="actions">
+ <button class="btn primary" data-act="explore">✦ Explore wilderness</button><button class="btn" data-act="mine">⛏ Mine resources ${p.mining_cooldown?`(${p.mining_cooldown} turns)`:""}</button><button class="btn" data-act="rest">♥ Rest &amp; heal</button>
+ <button class="btn danger" data-act="fight">⚔ Enter the arena</button><button class="btn" data-act="clan">⌂ Clan headquarters</button><button class="btn" data-act="craft">⚒ Crafting bench</button>
+ <button class="btn" data-act="trainer">✧ Skill trainer</button><button class="btn" data-act="market">◆ Marketplace &amp; bank</button><button class="btn" data-act="inventory">▤ Inventory &amp; stats</button>
+ </div><div class="callout"><b>${esc(p.species)} —</b> ${esc(p.buff)} ${esc(p.weakness)}</div><p class="small">Tip: Explore to gather gold and materials. Build up, learn abilities, and test your strength in the arena.</p>`;
+}
+function startCombat(){
+ const p=state.player,name=pick(Object.keys(enemies)),info=enemies[name];p.status_effects={};for(const a of Object.values(p.attacks))a.cd=0;
+ state.combat={name,info,hp:info.hp+p.level*10,maxHp:info.hp+p.level*10,effects:{},round:1};
+ state.screen="combat";say(`Combat engaged: ${name}!`,"bad");render();
+}
+function combatView(){
+ const c=state.combat,p=state.player;
+ if(!c)return dashboard();
+ const moves=Object.entries(p.attacks).map(([key,a],i)=>{let effect=a.dmg<0?`Heal ${Math.abs(a.dmg)+totalPower(p)}`:a.dmg===0?"Evade next attack":`${a.dmg+Math.floor(totalPower(p)/2)} damage${p.species==="Elf"?" · poison / critical":a.status?` · ${a.status}`:""}`;return `<div class="card"><h3>${i+1}. ${word(key)}</h3><p>${effect}</p><p>${a.cd?`Cooldown: ${a.cd} turn(s)`:`Ready · ${(a.max_cd+(p.species==="Cyborg"?1:0))}-turn cooldown`}</p><button class="btn primary wide" data-act="attack" data-key="${key}" ${a.cd?"disabled":""}>Use ability</button></div>`}).join("");
+ return `<div class="work-head"><h2>⚔ ${esc(c.name)}</h2><span class="pill">ROUND ${c.round}</span></div><div class="stat-row"><span>${esc(c.name)} health</span><strong>${Math.max(0,c.hp)}/${c.maxHp}</strong></div><div class="meter"><span style="width:${Math.max(0,Math.min(100,c.hp/c.maxHp*100))}%;background:#b85662"></span></div><div class="stat-row"><span>Your health</span><strong>${p.hp}/${p.base_max_hp}</strong></div><p class="small">Choose a move. The enemy attacks after your turn unless stunned, burning out, or evaded.</p><div class="cards">${moves}</div><div class="card"><h3>Emergency Shelter</h3><p>Spend 1 Dirt and 1 Stone to reduce the next hit by 15.</p><button class="btn wide" data-act="shelter" ${p.inventory.dirt<1||p.inventory.stone<1?"disabled":""}>Build cover · Dirt ${p.inventory.dirt} / Stone ${p.inventory.stone}</button></div>`;
+}
+function finishVictory(){
+ const p=state.player,c=state.combat,info=c.info,gold=rand(...info.gold);
+ p.gold+=gold;p.inventory[info.drop]=(p.inventory[info.drop]||0)+2;
+ say(`Victory! Defeated ${c.name}. Loot: ${gold} gold and 2 ${word(info.drop)}.`,"good");
+ gainXP(info.exp);for(const a of Object.values(p.attacks))a.cd=0;p.status_effects={};state.combat=null;state.screen="dashboard";
+}
+function defeat(){
+ const p=state.player;p.hp=Math.floor(p.base_max_hp/2);for(const a of Object.values(p.attacks))a.cd=0;p.status_effects={};say("Defeat! You recover at half health and return to camp.","bad");state.combat=null;state.screen="dashboard";
+}
+function playerTurn(key){
+ const p=state.player,c=state.combat,a=p.attacks[key];
+ if(!c||!a||a.cd>0)return;
+ let damage=0;
+ if(a.dmg<0){const amount=Math.abs(a.dmg)+totalPower(p),before=p.hp;heal(amount);say(`${word(key)} restored ${p.hp-before} HP.`,"good")}
+ else{
+  damage=a.dmg>0?a.dmg+Math.floor(totalPower(p)/2):0;
+  const critical=p.species==="Elf"&&damage>0&&Math.random()<.2;
+  if(critical){damage=Math.floor(damage*1.5);say("Critical hit! The Elf's precision increases the damage!","good")}
+  c.hp-=damage;say(`${word(key)} dealt ${damage} damage to the ${c.name}.`,"good");
+  let status=a.status;if(p.species==="Elf"&&damage>0)status="poison";
+  if(status==="drain"&&damage>0){const amount=Math.max(1,Math.floor(damage/3)),before=p.hp;heal(amount);say(`Life-steal restored ${p.hp-before} HP.`,"good")}
+  else if(["burn","poison"].includes(status)&&damage>0){const duration=status==="burn"?2:3,perTurn=Math.max(2,Math.floor(damage/6)),old=c.effects[status]||{turns:0,damage:0};c.effects[status]={turns:Math.max(duration,old.turns),damage:Math.max(perTurn,old.damage)};say(`${c.name} is afflicted with ${status}.`,"note")}
+  else if(status==="stun"){c.effects.stun=1;say(`${c.name} is stunned.`,"note")}
+  else if(status==="stealth"){p.status_effects.stealth=true;say("You vanish into the shadows and evade the next attack.","note")}
+ }
+ tickCooldowns();a.cd=a.max_cd+(p.species==="Cyborg"?1:0);
+ if(c.hp<=0){finishVictory();render();return}
+ for(const status of ["burn","poison"]){const effect=c.effects[status];if(!effect)continue;c.hp-=effect.damage;effect.turns--;say(`${c.name} takes ${effect.damage} ${status} damage.`,"good");if(effect.turns<=0)delete c.effects[status];if(c.hp<=0){finishVictory();render();return}}
+ if(c.effects.stun){delete c.effects.stun;say(`${c.name} is stunned and loses its turn.`,"note")}
+ else if(p.status_effects.stealth){delete p.status_effects.stealth;say(`${c.name} cannot find you and misses its turn.`,"note")}
+ else{
+  const [attack,base]=Object.entries(c.info.attacks)[rand(0,Object.keys(c.info.attacks).length-1)],incoming=Math.max(2,base+Math.floor(c.info.power/2)-totalDef(p));
+  p.hp-=incoming;say(`The ${c.name} used ${word(attack)} for ${incoming} damage.`,"bad");
+  if(p.hp<=0){defeat();render();return}
+ }
+ c.round++;render();
+}
+function shelter(){
+ const p=state.player,c=state.combat;if(!c||p.inventory.dirt<1||p.inventory.stone<1)return;
+ p.inventory.dirt--;p.inventory.stone--;tickCooldowns();say("You built emergency cover. The next hit is reduced by 15.","note");
+ for(const status of ["burn","poison"]){const e=c.effects[status];if(e){c.hp-=e.damage;e.turns--;say(`${c.name} takes ${e.damage} ${status} damage.`,"good");if(e.turns<=0)delete c.effects[status];if(c.hp<=0){finishVictory();render();return}}}
+ if(c.effects.stun){delete c.effects.stun;say(`${c.name} is stunned and loses its turn.`,"note")}
+ else if(state.player.status_effects.stealth){delete state.player.status_effects.stealth;say(`${c.name} cannot find you and misses its turn.`,"note")}
+ else{const [name,base]=Object.entries(c.info.attacks)[rand(0,Object.keys(c.info.attacks).length-1)];const incoming=Math.max(2,base+Math.floor(c.info.power/2)-totalDef(p)-15);p.hp-=incoming;say(`The ${c.name} hit your cover with ${word(name)} for ${incoming} damage.`,"bad");if(p.hp<=0){defeat();render();return}}
+ c.round++;render();
+}
+function recipeList(){
+ const list=Object.entries(recipes).filter(([,r])=>r.species==="Universal"||r.species===state.player.species);
+ return `<div class="work-head"><h2>Crafting bench</h2><button class="btn ghost" data-act="home">← Camp</button></div><p class="muted">Refine rare resources or craft equipment. Requirements are deducted when you craft.</p><div class="cards">${list.map(([key,r])=>`<div class="card"><h3>${word(key)}${r.qty>1?` ×${r.qty}`:""}</h3><p>Requires: ${Object.entries(r.req).map(([m,n])=>`${n} ${word(m)}`).join(" · ")}</p><p>${r.atk?`+${r.atk} ATK`:""}${r.def?`${r.atk?" · ":""}+${r.def} DEF`:""}${!r.atk&&!r.def?"Material refining":""}</p><button class="btn primary wide" data-act="craft-item" data-key="${key}" ${Object.entries(r.req).some(([m,n])=>state.player.inventory[m]<n)?"disabled":""}>Craft</button></div>`).join("")}</div>`;
+}
+function trainerView(){
+ return `<div class="work-head"><h2>Skill trainer academy</h2><button class="btn ghost" data-act="home">← Camp</button></div><p class="muted">Learn powerful attacks by paying gold and rare materials.</p><div class="cards">${Object.entries(trainer).map(([key,s])=>{const owned=!!state.player.attacks[key],afford=state.player.gold>=s.gold&&state.player.inventory[s.mat]>=s.qty;return `<div class="card"><h3>${word(key)} ${owned?"· KNOWN":""}</h3><p>${esc(s.desc)}</p><p>${s.atk.dmg<0?`Heal ${Math.abs(s.atk.dmg)}+ power`:`${s.atk.dmg}+ power`} · ${s.atk.max_cd} turn cooldown · ${s.atk.status||"no status"}</p><p>${s.gold} gold + ${s.qty} ${word(s.mat)}</p><button class="btn primary wide" data-act="learn" data-key="${key}" ${owned||!afford?"disabled":""}>${owned?"Already learned":afford?"Learn skill":"Not enough materials / gold"}</button></div>`}).join("")}</div>`;
+}
+function marketView(){
+ const p=state.player;
+ let inside="";
+ if(state.marketTab==="buy"){
+  inside=`<div class="table-wrap"><table class="table"><thead><tr><th>Item</th><th>Price</th><th>Have</th><th>Buy</th></tr></thead><tbody>${Object.entries(buyPrices).map(([item,price])=>`<tr><td>${word(item)}</td><td>${price} G</td><td>${p.inventory[item]||0}</td><td><button class="btn" data-act="buy" data-key="${item}">Buy 1</button></td></tr>`).join("")}</tbody></table></div><p class="small">Wallet: ${number(p.gold)} gold</p>`;
+ }else if(state.marketTab==="sell"){
+  const items=Object.keys(sellPrices).filter(k=>(p.inventory[k]||0)>0);
+  inside=items.length?`<div class="table-wrap"><table class="table"><thead><tr><th>Item</th><th>Have</th><th>Each</th><th>Sell</th></tr></thead><tbody>${items.map(item=>`<tr><td>${word(item)}</td><td>${p.inventory[item]}</td><td>${sellPrices[item]} G</td><td><button class="btn" data-act="sell" data-key="${item}">Sell 1</button></td></tr>`).join("")}</tbody></table></div>`:'<div class="empty">No sellable items in your inventory yet.</div>';
+ }else{
+  inside=`<div class="callout">Bank vault: <b>${number(p.bank_gold)} gold</b> · Earns 2% interest each action tick.</div><div class="form-row"><input id="bank-amount" type="number" min="1" step="1" value="10" aria-label="Amount of gold"><button class="btn primary" data-act="deposit">Deposit gold</button><button class="btn" data-act="withdraw">Withdraw gold</button></div><p class="small">Wallet: ${number(p.gold)} gold</p>`;
+ }
+ return `<div class="work-head"><h2>Grand marketplace</h2><button class="btn ghost" data-act="home">← Camp</button></div><div class="tabs">${["buy","sell","bank"].map(t=>`<button class="btn ${state.marketTab===t?"active":""}" data-act="market-tab" data-tab="${t}">${word(t)}</button>`).join("")}</div>${inside}`;
+}
+function clanView(){
+ const p=state.player,c=p.clan,tierCost=c.tier===1?{gold:500,mat:"stone",qty:10}:c.tier===2?{gold:1500,mat:"iron",qty:15}:null;
+ return `<div class="work-head"><h2>Clan headquarters</h2><button class="btn ghost" data-act="home">← Camp</button></div><div class="callout">Tier ${c.tier} ${["","Outpost","Fortress","Citadel"][c.tier]} · Warriors ${c.members}/${c.max_members}</div><div class="cards">${Object.entries(structureInfo).map(([key,s])=>`<div class="card"><h3>${s.label} · Lv ${c[key+"_lvl"]}</h3><p>${s.description}</p><p>Cost: ${s.gold} G + ${s.qty} ${word(s.mat)}</p><button class="btn wide" data-act="build" data-key="${key}" ${p.gold<s.gold||p.inventory[s.mat]<s.qty?"disabled":""}>Upgrade</button></div>`).join("")}</div><div class="card" style="margin-top:12px"><h3>Recruit a clan warrior</h3><p>${c.members<c.max_members?`Next warrior costs ${c.members*100} gold and gives +2 ATK.`:"Clan is full. Upgrade the tier or build barracks to expand capacity."}</p><button class="btn" data-act="recruit" ${c.members>=c.max_members||p.gold<c.members*100?"disabled":""}>Recruit · ${c.members*100} G</button></div><div class="card" style="margin-top:12px"><h3>Upgrade clan tier</h3><p>${tierCost?`Cost: ${tierCost.gold} G + ${tierCost.qty} ${word(tierCost.mat)} · adds 5 member slots.`:"Your Citadel is at maximum tier."}</p><button class="btn gold" data-act="tier" ${!tierCost||p.gold<tierCost.gold||p.inventory[tierCost.mat]<tierCost.qty?"disabled":""}>${tierCost?"Upgrade tier":"Maximum tier"}</button></div>`;
+}
+function inventoryView(){
+ const p=state.player,items=Object.entries(p.inventory).filter(([,q])=>q>0);
+ return `<div class="work-head"><h2>Inventory &amp; stats</h2><button class="btn ghost" data-act="home">← Camp</button></div><div class="callout">${esc(p.name)} · ${esc(p.species)} · Level ${p.level}<br>HP ${p.hp}/${p.base_max_hp} · ATK ${totalPower(p)} · DEF ${totalDef(p)} · Gold ${number(p.gold)} · Bank ${number(p.bank_gold)}</div><h3>Materials and items</h3>${items.length?`<div class="table-wrap"><table class="table"><thead><tr><th>Item</th><th>Quantity</th></tr></thead><tbody>${items.map(([k,n])=>`<tr><td>${word(k)}</td><td>${n}</td></tr>`).join("")}</tbody></table></div>`:'<div class="empty">Your bags are empty.</div>'}<h3 style="margin-top:18px">Known abilities</h3><p>${Object.entries(p.attacks).map(([k,a])=>`${word(k)} (${a.dmg<0?"healing":a.dmg===0?"evasion":`${a.dmg} base damage`})`).join(" · ")}</p>`;
+}
+function workspace(){
+ if(!state.player)return dashboard();
+ if(state.screen==="combat")return combatView();
+ if(state.screen==="craft")return recipeList();
+ if(state.screen==="trainer")return trainerView();
+ if(state.screen==="market")return marketView();
+ if(state.screen==="clan")return clanView();
+ if(state.screen==="inventory")return inventoryView();
+ return dashboard();
+}
+function render(){
+ renderTop();renderHero();$("#workspace").innerHTML=workspace();renderLog();drawScene();
+}
+function savePlayer(){
+ try{localStorage.setItem("realmforge-save-v1",JSON.stringify(state.player));say("Game saved in this browser.","good");}
+ catch(err){say(`Could not save: ${err.message}. Try exporting a backup instead.`,"bad")}
+}
+function loadableSave(){try{return !!localStorage.getItem("realmforge-save-v1")}catch{return false}}
+function normalizeLoaded(data){
+ const species=speciesData[data.species]?data.species:"Human",fresh=newPlayer(data.name||"Wayfarer",species);
+ const p={...fresh,...data,clan:{...fresh.clan,...(data.clan||{})},inventory:{...fresh.inventory,...(data.inventory||{})},attacks:{...fresh.attacks,...(data.attacks||{})},unlockables:{...fresh.unlockables,...(data.unlockables||{})}};
+ p.status_effects={};p.mining_cooldown=0;
+ for(const k of Object.keys(p.clan))if(k.endsWith("_lvl"))p.clan[k]=Number(p.clan[k])||0;
+ return p;
+}
+function exportSave(){
+ const data=new Blob([JSON.stringify(state.player,null,2)],{type:"application/json"}),url=URL.createObjectURL(data),a=document.createElement("a");
+ a.href=url;a.download=`${(state.player.name||"realmforge").toLowerCase().replace(/[^a-z0-9_-]+/g,"_")}_rpg_save.json`;a.click();URL.revokeObjectURL(url);say("Save backup downloaded.","good");
+}
+function build(key){
+ const p=state.player,c=p.clan,s=structureInfo[key];if(!s||p.gold<s.gold||p.inventory[s.mat]<s.qty)return;
+ p.gold-=s.gold;p.inventory[s.mat]-=s.qty;c[key+"_lvl"]++;
+ if(key==="armory"){p.bonus_power+=2;p.bonus_defence++}if(key==="barracks")c.max_members+=2;if(key==="watchtower")p.bonus_defence++;
+ say(`${s.label} upgraded to level ${c[key+"_lvl"]}. ${s.description}`,"good");render();
+}
+function craft(key){
+ const p=state.player,r=recipes[key];if(!r||Object.entries(r.req).some(([m,n])=>(p.inventory[m]||0)<n))return;
+ for(const [m,n]of Object.entries(r.req))p.inventory[m]-=n;
+ p.inventory[key]=(p.inventory[key]||0)+r.qty;p.bonus_defence+=r.def;p.bonus_power+=r.atk;
+ say(`Crafted ${r.qty} ${word(key)}.`,"good");
+ if(r.unlock&&p.unlockables[r.unlock]){p.attacks[r.unlock]=p.unlockables[r.unlock];delete p.unlockables[r.unlock];say(`Ability unlocked: ${word(r.unlock)}!`,"good")}
+ tickCooldowns();render();
+}
+function attackActions(key){
+ if(key==="explore"){
+  const mat=pick(RAW),amount=rand(2,4),gold=rand(15,40),p=state.player;p.inventory[mat]+=amount;p.gold+=gold;tickCooldowns();say(`Found ${amount} ${word(mat)} and ${gold} gold while exploring.`,"good")
+ }else if(key==="mine"){
+  const p=state.player;if(p.mining_cooldown>0){say(`Your mining team is exhausted. Wait ${p.mining_cooldown} more turn(s).`,"bad");return}
+  const mat=pick(["stone","iron","copper","crystal"]),amount=rand(3,6);p.inventory[mat]+=amount;tickCooldowns();p.mining_cooldown=3;say(`Mined ${amount} ${word(mat)}. The quarry is cooling down for 3 turns.`,"good")
+ }else if(key==="rest"){const p=state.player,before=p.hp;heal(35);tickCooldowns();say(`You rested and recovered ${p.hp-before} HP.`,"good")}
+ render();
+}
+document.addEventListener("click",e=>{
+ const button=e.target.closest("[data-act]");if(!button)return;
+ const act=button.dataset.act,key=button.dataset.key;
+ if(act==="new-game"){state.player=newPlayer($("#new-name")?.value||"",button.dataset.species);state.screen="dashboard";state.log=[];say(`Welcome, ${state.player.name} the ${state.player.species}. Your adventure begins!`,"good");render()}
+ else if(act==="load"){try{state.player=normalizeLoaded(JSON.parse(localStorage.getItem("realmforge-save-v1")));state.screen="dashboard";say(`Welcome back, ${state.player.name}.`,"good");render()}catch(err){say(`Could not load saved game: ${err.message}`,"bad")}}
+ else if(!state.player){return}
+ else if(act==="explore"||act==="mine"||act==="rest")attackActions(act)
+ else if(act==="fight")startCombat()
+ else if(act==="home")defaultView()
+ else if(act==="craft"){state.screen="craft";render()}
+ else if(act==="trainer"){state.screen="trainer";render()}
+ else if(act==="market"){state.screen="market";state.marketTab="buy";render()}
+ else if(act==="market-tab"){state.marketTab=button.dataset.tab;render()}
+ else if(act==="clan"){state.screen="clan";render()}
+ else if(act==="inventory"){state.screen="inventory";render()}
+ else if(act==="attack")playerTurn(key)
+ else if(act==="shelter")shelter()
+ else if(act==="craft-item")craft(key)
+ else if(act==="learn"){const p=state.player,s=trainer[key];if(s&&p.gold>=s.gold&&p.inventory[s.mat]>=s.qty&&!p.attacks[key]){p.gold-=s.gold;p.inventory[s.mat]-=s.qty;p.attacks[key]=structuredClone(s.atk);say(`Skill unlocked: ${word(key)}!`,"good");render()}}
+ else if(act==="build")build(key)
+ else if(act==="recruit"){const p=state.player,c=p.clan,cost=c.members*100;if(c.members<c.max_members&&p.gold>=cost){p.gold-=cost;c.members++;p.bonus_power+=2;say(`A warrior joined your clan! ${c.members}/${c.max_members} members.`,"good");render()}}
+ else if(act==="tier"){const p=state.player,c=p.clan,req=c.tier===1?{gold:500,mat:"stone",qty:10}:c.tier===2?{gold:1500,mat:"iron",qty:15}:null;if(req&&p.gold>=req.gold&&p.inventory[req.mat]>=req.qty){p.gold-=req.gold;p.inventory[req.mat]-=req.qty;c.tier++;c.max_members+=5;say(`Your clan is now a level ${c.tier} ${["","Outpost","Fortress","Citadel"][c.tier]}! Capacity increased.`,"good");render()}}
+ else if(act==="buy"){const p=state.player,price=buyPrices[key];if(price&&p.gold>=price){p.gold-=price;p.inventory[key]=(p.inventory[key]||0)+1;say(`Bought 1 ${word(key)} for ${price} gold.`,"good");render()}else say("Not enough gold.","bad")}
+ else if(act==="sell"){const p=state.player,price=sellPrices[key],r=recipes[key];if(price&&p.inventory[key]>0){p.inventory[key]--;p.gold+=price;p.bonus_defence-=(r?.def||0);p.bonus_power-=(r?.atk||0);say(`Sold 1 ${word(key)} for ${price} gold.`,"good");render()}}
+ else if(act==="deposit"||act==="withdraw"){const p=state.player,amount=Number($("#bank-amount")?.value);if(!Number.isSafeInteger(amount)||amount<=0){say("Enter a positive whole-number amount.","bad")}else if(act==="deposit"&&amount<=p.gold){p.gold-=amount;p.bank_gold+=amount;say(`Deposited ${amount} gold.`,"good");render()}else if(act==="withdraw"&&amount<=p.bank_gold){p.bank_gold-=amount;p.gold+=amount;say(`Withdrew ${amount} gold.`,"good");render()}else say(act==="deposit"?"Not enough wallet gold.":"Not enough gold in the vault.","bad")}
+ else if(act==="save")savePlayer()
+ else if(act==="export")exportSave()
+ else if(act==="clear-log"){state.log=[];renderLog()}
+});
+$("#import-file").addEventListener("change",async e=>{
+ const file=e.target.files[0];if(!file)return;
+ try{const data=JSON.parse(await file.text());if(!data||typeof data!=="object"||!data.name||!data.species)throw Error("That file does not look like a Realmforge save.");state.player=normalizeLoaded(data);state.screen="dashboard";say(`Imported ${state.player.name}'s save successfully.`,"good");render()}
+ catch(err){say(`Import failed: ${err.message}`,"bad")}finally{e.target.value=""}
+});
+function drawScene(){
+ const canvas=$("#scene");if(!canvas)return;const ctx=canvas.getContext("2d"),w=canvas.width,h=canvas.height,p=state.player,c=state.combat;
+ ctx.fillStyle="#18243a";ctx.fillRect(0,0,w,h);
+ for(let i=0;i<48;i++){const x=(i*173+41)%w,y=(i*67+17)%(h*.58);ctx.fillStyle=i%4?"#c2d4d9":"#8fa9c2";ctx.fillRect(x,y,2,2)}
+ ctx.fillStyle="#d9d4b7";ctx.beginPath();ctx.arc(w-132,58,28,0,Math.PI*2);ctx.fill();ctx.fillStyle="#18243a";ctx.fillRect(w-145,39,11,7);ctx.fillRect(w-119,62,8,6);
+ ctx.fillStyle="#293c56";ctx.beginPath();ctx.moveTo(0,164);ctx.lineTo(122,63);ctx.lineTo(222,159);ctx.lineTo(374,72);ctx.lineTo(536,163);ctx.lineTo(687,82);ctx.lineTo(840,157);ctx.lineTo(840,240);ctx.lineTo(0,240);ctx.fill();
+ ctx.fillStyle="#3c5266";ctx.beginPath();ctx.moveTo(0,186);ctx.lineTo(180,115);ctx.lineTo(315,193);ctx.lineTo(465,119);ctx.lineTo(639,190);ctx.lineTo(757,132);ctx.lineTo(840,178);ctx.lineTo(840,240);ctx.lineTo(0,240);ctx.fill();
+ [[122,63],[374,72],[687,82]].forEach(([x,y])=>{ctx.fillStyle="#8497a6";ctx.beginPath();ctx.moveTo(x-17,y+20);ctx.lineTo(x,y);ctx.lineTo(x+17,y+20);ctx.lineTo(x+6,y+15);ctx.lineTo(x,y+8);ctx.lineTo(x-8,y+16);ctx.fill()});
+ ctx.fillStyle="#17372f";ctx.fillRect(0,179,w,61);for(let y=180;y<h;y+=5){ctx.fillStyle=`rgb(${20+Math.floor((y-180)/5)},${49+Math.floor((y-180)/6)},${42+Math.floor((y-180)/8)})`;ctx.fillRect(0,y,w,5)}
+ for(let i=0;i<20;i++){const x=(i*137+19)%w,y=195+(i*29)%37;ctx.fillStyle="#376b4a";ctx.fillRect(x,y,3,8);ctx.fillRect(x-3,y+3,3,3)}
+ [[51,160],[w-90,168]].forEach(([x,y])=>{ctx.fillStyle="#4a555e";ctx.fillRect(x,y-64,13,64);ctx.fillRect(x-5,y-69,23,7);ctx.fillRect(x+24,y-38,10,38);ctx.fillRect(x+21,y-43,16,6)});
+ function sprite(cx,cy,type,scale=1){
+  const s=scale;ctx.save();ctx.translate(cx,cy);ctx.scale(s,s);
+  const colors={Human:["#d0a27a","#406e88","#b78b48"],Vampire:["#d9d5e5","#54345f","#b3345d"],Cyborg:["#a8c8ca","#556f7a","#54c0af"],Elf:["#dfc08d","#437c60","#a4d179"]};
+  const pal=colors[type]||["#9ba8a3","#5d606e","#b94c58"];
+  ctx.fillStyle="#142027";ctx.fillRect(-13,5,26,4);ctx.fillStyle=pal[1];ctx.fillRect(-8,-21,16,23);ctx.fillRect(-10,-4,7,12);ctx.fillRect(3,-4,7,12);ctx.fillStyle=pal[0];ctx.fillRect(-7,-34,14,13);ctx.fillStyle="#18222a";ctx.fillRect(-8,-39,16,5);ctx.fillRect(-5,-43,11,5);ctx.fillStyle=pal[2];ctx.fillRect(-7,-9,14,4);
+  if(type==="Elf"){ctx.fillStyle="#4b5734";ctx.fillRect(7,-24,3,23);ctx.fillRect(8,-26,7,3)}
+  if(type==="Cyborg"){ctx.fillStyle="#71ded0";ctx.fillRect(-4,-31,3,2);ctx.fillRect(2,-31,3,2)}
+  if(type==="Vampire"){ctx.fillStyle="#c24c69";ctx.fillRect(-13,-19,5,16);ctx.fillRect(8,-19,5,16)}
+  if(type==="Elder Dragon"){ctx.fillStyle="#637b70";ctx.fillRect(-31,-30,62,28);ctx.fillRect(-23,-43,28,17);ctx.fillRect(15,-38,23,7);ctx.fillRect(-42,-20,17,5);ctx.fillRect(24,-19,19,5);ctx.fillStyle="#ce6e58";ctx.fillRect(26,-36,4,3);ctx.fillRect(-6,-49,5,9);ctx.fillRect(5,-48,5,8)}
+  if(type==="Goblin Scout"){ctx.fillStyle="#6fa253";ctx.fillRect(-7,-34,14,13);ctx.fillStyle="#d0c58a";ctx.fillRect(-4,-30,3,3);ctx.fillRect(3,-30,3,3)}
+  if(type==="Bandit Marauder"){ctx.fillStyle="#78573f";ctx.fillRect(-9,-35,18,14);ctx.fillStyle="#b7ac94";ctx.fillRect(-7,-31,3,3)}
+  if(type==="Corrupted Cyborg"){ctx.fillStyle="#64bbaa";ctx.fillRect(-7,-33,14,12);ctx.fillRect(4,-24,8,5)}
+  if(type==="Vampire Lord"){ctx.fillStyle="#6c3c65";ctx.fillRect(-10,-37,20,17);ctx.fillStyle="#e26178";ctx.fillRect(-5,-31,3,3);ctx.fillRect(3,-31,3,3)}
+  ctx.restore()
+ }
+ if(c){sprite(360,211,p.species,2.4);sprite(610,212,c.name,c.name==="Elder Dragon"?2.4:2);}
+ else if(p)sprite(w/2,208,p.species,3);
+ ctx.fillStyle="#61788c";ctx.fillRect(0,h-3,w,3);
+ if(c){ctx.fillStyle="#0c1521";ctx.fillRect(22,22,176,16);ctx.fillStyle="#d86568";ctx.fillRect(24,24,172*Math.max(0,c.hp/c.maxHp),12);ctx.fillStyle="#eef1ed";ctx.font="11px monospace";ctx.fillText(`${c.name}: ${Math.max(0,c.hp)}/${c.maxHp}`,25,18)}
+}
+function animate(){if(state.player){drawScene();requestAnimationFrame(animate)}}
+render();requestAnimationFrame(animate);
+</script>
+</body>
+</html>
