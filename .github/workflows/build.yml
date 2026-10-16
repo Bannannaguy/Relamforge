@@ -17,20 +17,20 @@ jobs:
       uses: actions/checkout@v4
 
     - name: Set up Python
-      uses: actions/actions-setup-python@v5
+      uses: actions/setup-python@v5
       with:
-        python-base-version: '3.11'
+        python-version: '3.11'
 
     - name: Install PyInstaller
       run: pip install pyinstaller
 
     - name: Build with PyInstaller (Windows/Linux)
       if: matrix.os != 'macos-latest'
-      run: pyinstaller --onefile main.py
+      run: pyinstaller --onefile "import random.py"
 
     - name: Build with PyInstaller (Mac App Bundle)
       if: matrix.os == 'macos-latest'
-      run: pyinstaller --onefile --windowed main.py
+      run: pyinstaller --onefile --windowed "import random.py"
 
     - name: Upload Binary to Release
       uses: softprops/action-gh-release@v2
