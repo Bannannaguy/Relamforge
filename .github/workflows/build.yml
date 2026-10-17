@@ -18,13 +18,10 @@ jobs:
       matrix:
         include:
           - os: windows-latest
-            script-name: 'import random.py'
             binary-name: Realmforge-Windows
           - os: ubuntu-latest
-            script-name: 'import random.py'
             binary-name: Realmforge-Linux
           - os: macos-latest
-            script-name: 'import random.py'
             binary-name: Realmforge-macOS
 
     steps:
@@ -37,13 +34,15 @@ jobs:
           python-version: '3.11'
 
       - name: Install build dependencies
+        shell: bash
         run: |
           python -m pip install --upgrade pip
           python -m pip install pyinstaller pygame
 
       - name: Build Executable
+        shell: bash
         run: |
-          python -m PyInstaller --onefile --name "${{ matrix.binary-name }}" "${{ matrix.script-name }}"
+          python -m PyInstaller --onefile --name "${{ matrix.binary-name }}" main.py
 
       - name: Upload Artifacts to Release
         uses: softprops/action-gh-release@v2
